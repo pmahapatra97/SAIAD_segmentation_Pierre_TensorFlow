@@ -1,0 +1,78 @@
+#!/bin/bash
+
+
+#$ -N benchmark200shift_1s_ovassion-unet_tf2_pierre"
+#$ -o ../logs/$JOB_NAME.o$JOB_ID
+
+EXPERIMENT=benchmarkBis200
+
+#$ -q volta.q
+#$ -l gpu=1
+
+#$ -l h_vmem=512G
+
+
+##export PATH="/usr/local/bin:/sbin:$PATH"
+export PATH="/usr/local/bin:$PATH"
+
+export LD_LIBRARY_PATH="/usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH"
+
+modprobe nvidia NVreg_RestrictProfilingToAdminUsers=0
+
+# tumeur, reinPatho, ..
+# SAIAD_01 SAIAD_02 SAIAD_02Bis SAIAD_04 SAIAD_05 SAIAD_07 SAIAD_09 SAIAD_10 SAIAD_11 SAIAD_12 SAIAD_13 SAIAD_14 SAIAD_15 SAIAD_15Bis
+
+# singularity exec --nv /Home/Users/pberriet/WORK/tensorflow2/tensorflow-gpu.simg \
+module load anaconda
+export HOME=$WORK
+conda activate tensorflow
+
+python --version
+
+# python train_test_unet.py \
+# 	SAIAD_01 SAIAD_02 SAIAD_02Bis SAIAD_04 SAIAD_05 SAIAD_07 SAIAD_09 SAIAD_10 SAIAD_11 SAIAD_12 SAIAD_13 SAIAD_14 SAIAD_15 SAIAD_15Bis \
+# 	-n $EXPERIMENT \
+# 	--structure tumeur \
+# 	--epochs 200 \
+# 	--batch_size 16 \
+# 	--dropout_rate 0.0 \
+# 	--encoder_freeze 0.0 \
+# 	--learning_rate 1e-4 \
+# 	--ovassion \
+# 	--selection gap \
+# 	--gap 3 \
+# 	--ovassion_exp benchmark200 \
+# 	# --nbSelected 20 \
+# 	# --augmentation \
+# 	# --enhanced \
+
+
+python 1sliceAL_experiment.py \
+	SAIAD_01  \
+	-n benchmark200shift \
+	--structure tumeur \
+	--epochs 10 \
+	--encoder_freeze 0.6 \
+	--ovassion \
+	--selection number \
+	--nbSelected 1 \
+	--ovassion_exp benchmark200 \
+
+
+
+#for i in SAIAD_01 SAIAD_02 SAIAD_02Bis SAIAD_04 SAIAD_05 SAIAD_07 SAIAD_09 SAIAD_10 SAIAD_11 SAIAD_12 SAIAD_13 SAIAD_14 SAIAD_15 SAIAD_15Bis; do mkdir /Users/pierreberriet/WORK/tensorflow2/Unet/results_benchmarkF1200/$i/ ; scp pberriet@mesologin1.univ-fcomte.fr:/Home/Users/pberriet/WORK/tensorflow2/Unet/results_benchmarkF1200/$i/sim.npy /Users/pierreberriet/WORK/tensorflow2/Unet/results_benchmarkF1200/$i/sim.npy ; done
+
+
+# resetpid () {
+# 	PID=`lsof -i:"$1" | tail -n 1 | cut -d " " -f 2`
+# 	if [ -z $PID ] ; then echo "free"; else echo "occupied"; kill -9 $PID;fi
+# }
+
+# PID=`lsof -i:16010 | tail -n 1 | cut -d " " -f 2`
+
+# if [ ! -z $PID ] ; then kill -9 $PID;fi
+
+# tt () {
+# 	PID=`lsof -i:"$1" | tail -n 1 | cut -d' ' -f 3`
+# 	echo $PID
+# }
